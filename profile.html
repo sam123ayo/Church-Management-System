@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body{
+            font-family: Arial;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar{
+            background: #111;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar button{
+            background: red;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .container{
+            width: 400px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        h2{
+            margin-bottom: 20px;
+        }
+
+        .info{
+            margin-bottom: 15px;
+        }
+
+        .label{
+            font-weight: bold;
+        }
+
+        .card{
+            background: #f4f6f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Church App</h2>
+
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+
+    <div style="text-align:center; margin-bottom:20px;">
+
+    <img
+        id="profileImage"
+        src=""
+        width="120"
+        height="120"
+        style="
+            border-radius:50%;
+            object-fit:cover;
+            border:3px solid #ddd;
+        "
+    >
+
+    <br><br>
+
+    <input type="file" id="picture">
+
+    <br><br>
+
+    <button onclick="uploadPicture()">
+        Upload Picture
+    </button>
+
+    </div>
+
+    <h2>My Profile</h2>
+    <br>
+    <button onclick="updateProfile()">Save Changes</button>
+
+    <div class="card">
+        <div class="info">
+            <span class="label">Name:</span>
+            <input type="text" id="name">
+        </div>
+
+        <div class="info">
+            <span class="label">Email:</span>
+            <input type="email" id="email">
+        </div>
+
+        <div class="info">
+            <span class="label">Role:</span>
+        <input type="text" id="role" disabled>
+    </div>
+
+</div>
+
+<script>
+
+const API = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "login.html";
+}
+
+// Logout
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    window.location.href = "login.html";
+}
+
+// Load profile
+async function loadProfile() {
+
+    try {
+
+        const res = await fetch(`${API}/profile`, {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if (res.status === 401) {
+            alert("Session expired");
+            logout();
+            return;
+        }
+
+        const data = await res.json();
+
+        document.getElementById("name").value = data.name;
+        document.getElementById("email").value = data.email;
+        document.getElementById("role").value = data.role;
+
+    } catch (err) {
+        console.error(err);
+        alert("Server error");
+    }
+    if (data.profile_picture) {
+    document.getElementById("profileImage").src =
+        `http://127.0.0.1:8000/${data.profile_picture}`;
+}
+}
+
+async function updateProfile() {
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+
+    try {
+
+        const res = await fetch(`${API}/profile/update`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                name,
+                email
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert(data.message);
+        } else {
+            alert(data.detail);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Server error");
+    }
+    if (data.profile_picture) {
+    document.getElementById("profileImage").src =
+        `http://127.0.0.1:8000/${data.profile_picture}`;
+}
+}
+
+</script>
+loadProfile();
+<script>
+
+async function uploadPicture() {
+
+    const fileInput = document.getElementById("picture");
+
+    const formData = new FormData();
+
+    formData.append("file", fileInput.files[0]);
+
+    try {
+
+        const res = await fetch(`${API}/profile/upload-picture`, {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+
+            document.getElementById("profileImage").src = data.image_url;
+
+            alert("Picture uploaded successfully");
+
+        } else {
+            alert(data.detail);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Upload failed");
+    }
+}
+
+</script>
+
+</script>
+
+</body>
+</html>

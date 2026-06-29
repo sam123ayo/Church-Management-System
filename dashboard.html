@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Church Dashboard</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    display:flex;
+    background:#f4f6f9;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:250px;
+    height:100vh;
+    background:#111827;
+    color:white;
+    padding:20px;
+    position:fixed;
+}
+
+.sidebar h2{
+    text-align:center;
+    margin-bottom:30px;
+    color:#22c55e;
+}
+
+.sidebar button{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border:none;
+    background:#1f2937;
+    color:white;
+    cursor:pointer;
+    border-radius:6px;
+    transition:0.3s;
+    font-size:15px;
+}
+
+.sidebar button:hover{
+    background:#22c55e;
+}
+
+.logout{
+    background:#dc2626 !important;
+}
+
+.logout:hover{
+    background:#991b1b !important;
+}
+
+/* MAIN CONTENT */
+
+.main{
+    margin-left:250px;
+    width:100%;
+    padding:20px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card h3{
+    margin-bottom:10px;
+    color:#111827;
+}
+
+.card p{
+    font-size:24px;
+    color:#22c55e;
+}
+
+/* CONTENT */
+
+.content-box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input, select{
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.submit-btn{
+    padding:12px;
+    background:#22c55e;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.submit-btn:hover{
+    background:#15803d;
+}
+
+.member-item{
+    margin-bottom:8px;
+}
+
+/* Members Table */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th,
+table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+table th {
+    background: #0b1736;
+    color: white;
+}
+
+.add-btn {
+    background: green;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background: orange;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <h2>RCCG House Of His Blessings Management System</h2>
+
+    <button onclick="dashboardHome()">Dashboard</button>
+    
+    <button onclick="showMembers()">Members</button>
+
+    <div id="adminMenu">
+
+        <button onclick="showAttendance()">Attendance</button>
+
+        <button onclick="showAbsentees()">Absentees</button>
+
+        <button onclick="viewAllPayments()">All Payments</button>
+
+        <button onclick="showEvents()">Events</button>
+
+    </div>
+
+    <button onclick="showPayments()">My Payments</button>
+
+    <button class="logout" onclick="logout()">Logout</button>
+
+    <button onclick="showChangePassword()">Change Password</button>
+
+    <button onclick="showMemberCard()"> QR Member Card</button>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+    <div class="topbar">
+        <h1>Dashboard</h1>
+
+        <h3 id="roleText"></h3>
+    </div>
+
+    <!-- STATS -->
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Members</h3>
+            <p id="totalMembers">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Payments</h3>
+            <p id="totalPayments">₦0</p>
+        </div>
+
+        <div class="card">
+            <h3>Attendance</h3>
+            <p id="attendanceCount">0</p>
+        </div>
+
+        
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content-box" id="content">
+
+        <h2>Welcome to Church Management System</h2>
+
+        <p>Select a menu from the sidebar.</p>
+
+    </div>
+
+    <div class="card">
+    <div class="members-header">
+        <h2>Members</h2>
+
+        <button onclick="openAddMemberModal()" class="add-btn">
+            Add Member
+        </button>
+    </div>
+
+    <table id="membersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="membersBody">
+
+        </tbody>
+    </table>
+</div>
+
+</div>
+
+<script>
+
+const API = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("token");
+
+const role = localStorage.getItem("role");
+
+/* CHECK LOGIN */
+
+if(!token){
+    window.location.href = "login.html";
+}
+
+/* ROLE UI */
+
+document.getElementById("roleText").innerText =
+    role === "admin" ? "Admin" : "Member";
+
+/* HIDE ADMIN MENU */
+
+if(role !== "admin"){
+    document.getElementById("adminMenu").style.display = "none";
+}
+
+/* LOGOUT */
+
+function logout(){
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("role");
+
+    window.location.href = "login.html";
+}
+
+/* HOME */
+
+function dashboardHome(){
+
+    document.getElementById("content").innerHTML = `
+        <h2>Welcome</h2>
+        <p>Church Management Dashboard</p>
+    `;
+}
+
+/* MEMBERS 
+
+async function showMembers(){
+
+    const res = await fetch(`${API}/members`,{
+        headers:{
+            "Authorization":"Bearer " + token
+        }
+    });
+
+    if(res.status === 401 || res.status === 403){
+        alert("Unauthorized");
+        logout();
+        return;
+    }
+
+    const data = await res.json();
+
+    let html = `<h2>Members</h2>`;
+
+    data.forEach(user=>{
+        html += `<p>${user.name}</p>`;
+    });
+
+    document.getElementById("content").innerHTML = html;
+
+    document.getElementById("totalMembers").innerText =
+        data.length;
+}                              */
+
+async function loadMembers() {
+
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API}/members`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const members = await response.json();
+
+    const tbody = document.getElementById("membersBody");
+
+    tbody.innerHTML = "";
+
+    members.forEach(member => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${member.id || ""}</td>
+            <td>${member.name || ""}</td>
+            <td>${member.email || ""}</td>
+            <td>${member.phone || ""}</td>
+            <td>${member.gender || ""}</td>
+            <td>${member.department || ""}</td>
+
+            <td>
+                <button class="edit-btn"
+                onclick="editMember(${member.id})">
+                Edit
+                </button>
+
+                <button class="delete-btn"
+                onclick="deleteMember(${member.id})">
+                Delete
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    document.getElementById("totalMembers").innerText =
+        members.length;
+}
+
+loadMembers();
+
+function editMember(id) {
+
+    localStorage.setItem("edit_member_id", id);
+
+    window.location.href = "edit-member.html";
+}
+
+/* ATTENDANCE */
+
+async function showAttendance(){
+
+    const res = await fetch(`${API}/members`,{
+        headers:{
+            "Authorization":"Bearer " + token
+        }
+    });
+
+    const users = await res.json();
+
+    let html = `
+        <h2>Mark Attendance</h2>
+
+        <input type="date" id="date">
+    `;
+
+    users.forEach(user=>{
+
+        html += `
+            <div class="member-item">
+
+                <label>
+
+                    <input type="checkbox"
+                    value="${user.id}">
+
+                    ${user.name}
+
+                </label>
+
+            </div>
+        `;
+    });
+
+    html += `
+        <button class="submit-btn"
+        onclick="submitAttendance()">
+
+        Submit Attendance
+
+        </button>
+    `;
+
+    document.getElementById("content").innerHTML = html;
+}
+
+/* SUBMIT ATTENDANCE */
+
+async function submitAttendance(){
+
+    const date =
+        document.getElementById("date").value;
+
+    const checkboxes =
+        document.querySelectorAll('input[type="checkbox"]:checked');
+
+    const member_ids = [];
+
+    checkboxes.forEach(box=>{
+        member_ids.push(parseInt(box.value));
+    });
+
+    const res = await fetch(`${API}/attendance/mark`,{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + token
+        },
+
+        body:JSON.stringify({
+            member_ids,
+            date
+        })
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+}
+
+/* ABSENTEES */
+
+async function showAbsentees(){
+
+    const date = prompt("Enter date YYYY-MM-DD");
+
+if (!date) {
+    alert("Date is required");
+    return;
+}
+
+    const res = await fetch(
+        `${API}/attendance/absentees?date=${date}`,
+        {
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        }
+    );
+
+    const data = await res.json();
+
+    let html = `
+    <h2>Absentees</h2>
+
+    <button class="submit-btn"
+    onclick="exportCSV()">
+
+    Export CSV
+
+    </button>
+
+    <br><br>
+`;
+
+    data.absentees.forEach(user=>{
+
+        html += `
+            <p>
+                ${user.name}
+                (${user.email})
+            </p>
+        `;
+    });
+
+    document.getElementById("content").innerHTML = html;
+}
+function exportCSV(){
+
+    const date = prompt("Enter date YYYY-MM-DD");
+
+if (!date) {
+    alert("Date is required");
+    return;
+}
+
+    window.open(
+        `${API}/attendance/export?date=${date}`,
+        "_blank"
+    );
+}
+
+/* PAYMENTS */
+
+function showPayments(){
+
+    document.getElementById("content").innerHTML = `
+
+        <h2>Make Payment</h2>
+
+        <select id="type">
+
+            <option value="offering">
+                Offering
+            </option>
+
+            <option value="donation">
+                Donation
+            </option>
+
+        </select>
+
+        <input type="number"
+        id="amount"
+        placeholder="Amount">
+
+        <button class="submit-btn"
+        onclick="submitPayment()">
+
+        Pay
+
+        </button>
+
+        <hr><br>
+
+        <div id="paymentList"></div>
+    `;
+
+    loadMyPayments();
+}
+
+/* SUBMIT PAYMENT */
+
+async function submitPayment(){
+
+    const type =
+        document.getElementById("type").value;
+
+    const amount =
+        document.getElementById("amount").value;
+
+    const res = await fetch(`${API}/payments`,{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + token
+        },
+
+        body:JSON.stringify({
+            type,
+            amount:parseInt(amount)
+        })
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    loadMyPayments();
+}
+
+/* LOAD MY PAYMENTS */
+
+async function loadMyPayments(){
+
+    const res = await fetch(`${API}/payments/my`,{
+        headers:{
+            "Authorization":"Bearer " + token
+        }
+    });
+
+    const data = await res.json();
+
+    let html = `<h3>Payment History</h3>`;
+
+    data.forEach(p=>{
+
+        html += `
+            <p>
+                ${p.type}
+                - ₦${p.amount}
+                (${p.date})
+            </p>
+        `;
+    });
+
+    document.getElementById("paymentList").innerHTML = html;
+}
+
+/* VIEW ALL PAYMENTS */
+
+async function viewAllPayments(){
+
+    const res = await fetch(`${API}/payments`,{
+        headers:{
+            "Authorization":"Bearer " + token
+        }
+    });
+
+    const data = await res.json();
+
+    let html = `<h2>All Payments</h2>`;
+
+    let total = 0;
+
+    data.forEach(p=>{
+
+        total += p.amount;
+
+        html += `
+            <p>
+                ${p.type}
+                - ₦${p.amount}
+            </p>
+        `;
+    });
+
+    document.getElementById("content").innerHTML = html;
+
+    document.getElementById("totalPayments").innerText =
+        "₦" + total;
+}
+async function showEvents(){
+
+    const res = await fetch(`${API}/events`);
+
+    const data = await res.json();
+
+    let html = `
+        <h2>Church Events</h2>
+    `;
+
+    // ADMIN CREATE EVENT FORM
+    if(role === "admin"){
+
+        html += `
+            <h3>Create Event</h3>
+
+            <input type="text"
+            id="eventTitle"
+            placeholder="Event Title">
+
+            <textarea id="eventDescription"
+            placeholder="Description"
+            style="width:100%;padding:10px;"></textarea>
+
+            <br><br>
+
+            <input type="date" id="eventDate">
+
+            <button class="submit-btn"
+            onclick="createEvent()">
+
+            Create Event
+
+            </button>
+
+            <hr><br>
+        `;
+    }
+
+    // EVENTS LIST
+    data.forEach(event=>{
+
+        html += `
+            <div class="card">
+
+                <h3>${event.title}</h3>
+
+                <p>${event.description}</p>
+
+                <p><b>Date:</b> ${event.date}</p>
+        `;
+
+        // MEMBER REGISTER BUTTON
+        if(role !== "admin"){
+
+            html += `
+                <button class="submit-btn"
+                onclick="registerEvent(${event.id})">
+
+                Attend Event
+
+                </button>
+            `;
+        }
+
+        // ADMIN DELETE BUTTON
+        if(role === "admin"){
+
+            html += `
+                <button class="logout"
+                onclick="deleteEvent(${event.id})">
+
+                Delete
+
+                </button>
+            `;
+        }
+
+        html += `</div><br>`;
+    });
+
+    document.getElementById("content").innerHTML = html;
+}
+async function createEvent(){
+
+    const title =
+        document.getElementById("eventTitle").value;
+
+    const description =
+        document.getElementById("eventDescription").value;
+
+    const date =
+        document.getElementById("eventDate").value;
+
+    const res = await fetch(`${API}/events`,{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + token
+        },
+
+        body:JSON.stringify({
+            title,
+            description,
+            date
+        })
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    showEvents();
+}
+async function registerEvent(event_id){
+
+    const res = await fetch(
+        `${API}/events/register/${event_id}`,
+        {
+            method:"POST",
+
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        }
+    );
+
+    const data = await res.json();
+
+    alert(data.message);
+}
+async function deleteEvent(event_id){
+
+    if(!confirm("Delete event?")) return;
+
+    const res = await fetch(
+        `${API}/events/${event_id}`,
+        {
+            method:"DELETE",
+
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        }
+    );
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    showEvents();
+}
+
+function showChangePassword() {
+    document.getElementById("content").innerHTML = `
+        <div class="card">
+            <h2>Change Password</h2>
+
+            <input type="password" id="oldPassword" placeholder="Old Password"><br><br>
+
+            <input type="password" id="newPassword" placeholder="New Password"><br><br>
+
+            <button onclick="changePassword()">
+                Update Password
+            </button>
+        </div>
+    `;
+}
+
+async function changePassword() {
+    const old_password = document.getElementById("oldPassword").value;
+    const new_password = document.getElementById("newPassword").value;
+
+    const res = await fetch(`${API}/change-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            old_password,
+            new_password
+        })
+    });
+
+    const data = await res.json();
+
+    alert(data.message || data.detail);
+
+    
+async function showMemberCard() {
+
+    const res = await fetch(`${API}/me`, {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const user = await res.json();
+
+    document.getElementById("content").innerHTML = `
+        <div class="card" style="text-align:center; max-width:400px; margin:auto;">
+
+            <h2>Member Card</h2>
+
+            <img src="${user.profile_picture || 'https://via.placeholder.com/100'}"
+                 style="width:100px;height:100px;border-radius:50%;"><br><br>
+
+            <h3>${user.name}</h3>
+            <p>${user.email}</p>
+
+            <div id="qrcode"></div>
+        </div>
+    `;
+
+    QRCode.toCanvas(document.getElementById('qrcode'), user.email);
+}
+
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</body>
+</html>

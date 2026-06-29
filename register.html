@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: green;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Register</h2>
+
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="phone" placeholder="Phone Number">
+
+    <select id="gender">
+       <option value="">Select Gender</option>
+       <option value="Male">Male</option>
+       <option value="Female">Female</option>
+    </select>
+
+<input type="text" id="department" placeholder="Department">
+    <input type="password" id="password" placeholder="Password">
+
+    <button type="button" onclick="register()">Register</button>
+    <p id="msg"></p>
+</div>
+
+<script>
+async function register() {
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const phone = document.getElementById("phone").value;
+    const gender = document.getElementById("gender").value;
+    const department = document.getElementById("department").value;
+
+    try {
+
+        const res = await fetch("http://127.0.0.1:8000/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password,
+                phone: phone,
+                gender: gender,
+                department: department
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+
+            alert("Registered successfully!");
+
+            window.location.href = "login.html";
+
+        } else {
+
+            alert(data.detail || "Registration failed");
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Cannot connect to server!");
+
+    }
+}
+</script>
+
+</body>
+</html>
